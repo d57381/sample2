@@ -23,7 +23,7 @@
   (r/with-let [expanded? (r/atom false)]
     [:nav.navbar.is-info>div.container
      [:div.navbar-brand
-      [:a.navbar-item {:href "/" :style {:font-weight :bold}} "sample1"]
+      [:a.navbar-item {:href "/" :style {:font-weight :bold}} "sample2"]
       [:span.navbar-burger.burger
        {:data-target :nav-menu
         :on-click #(swap! expanded? not)
@@ -40,16 +40,16 @@
    [:img {:src "/img/warning_clojure.png"}]])
 
 (def getAtom (r/atom 0)) ;Atom that will hold the value obtained from GET
-(def postAtom (r/atom 0)) ;Atom that will hold the value obtained from POST
+(def myData (r/atom {:x 1 :y 2 :result 0})) ;Atom that will hold the value obtained from POST
 (def multAtom (r/atom 0)) ;Atom that will hold the value for multiplication
 
 (def myNumbers [(rand-int 1000) (rand-int 1000)])
 ;(def comps [(r/atom comp1 [1 2 0]) (r/atom comp2 [97 52 0]) (r/atom comp3 [2 2 0])])
 
-(defn postSum [vec resultAtom]
+(defn postSum [data]
   (POST "/api/math/plus"    {:headers {"accept" "application/json"}
-                             :params {:x (first vec) :y (second vec)}
-                             :handler #(reset! resultAtom (:total %))})
+                             :params {:x (:x @data) :y (:y @data)}
+                             :handler #(swap! data assoc :result (:total %))})
   )
 
 (defn getSum [vec resultAtom]
@@ -65,20 +65,33 @@
                            :params  {:x (first vec) :y (second vec)}
                            :handler #(reset! resultAtom (:total %))}))
 
+(defn text-field [tag id data] ;function for input text element. Tag should be :input.input, id is the keyword to access data (:x or :y)
+  [:div.field
+   [tag
+    {:type :number
+     :value (id @data)
+     :on-change #(do
+                   (prn "change" id (-> % .-target .-value))
+                   (swap! data assoc id (js/parseInt (-> % .-target .-value)))
+                   (postSum data))}]]
+  )
+
 (defn generateMathUI []
-  (let [vars {:x 0 :y 0} result (r/atom 0)])
+  (let [vars (r/atom {:x 0 :y 0}) result (r/atom 0)]
   (fn []
      [:div
       [:p "Enter First Number:"]
       [text-field :input.input :x vars ]
+      [:p]
       [:p "Enter Second Number:"]
       [text-field :input.input :y vars]
       ]
-     )
+     ))
   )
 
 (defn home-page []
-
+[:div
+ [generateMathUI]]
 
 
   )
@@ -128,9 +141,9 @@
   (ajax/load-interceptors!)
   (fetch-docs!)
 
-  (postSum myNumbers postAtom)
+  (postSum myData)
   (getSum myNumbers getAtom)
-  (postProduct myNumbers multAtom)
+  ;(postProduct myNumbers multAtom)
 
   (hook-browser-navigation!)
   (mount-components))
