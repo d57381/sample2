@@ -60,10 +60,10 @@
     )
   )
 
-(defn postProduct [vec resultAtom]
+(defn postProduct [data]
   (POST "/api/math/times" {:headers {"accept" "application/json"}
-                           :params  {:x (first vec) :y (second vec)}
-                           :handler #(reset! resultAtom (:total %))}))
+                           :params  {:x (:x @data) :y (:y @data)}
+                           :handler #(swap! data assoc :result (:total %))}))
 
 (defn text-field [tag id data] ;function for input text element. Tag should be :input.input, id is the keyword to access data (:x or :y)
   [:div.field
@@ -77,14 +77,17 @@
   )
 
 (defn generateMathUI []
-  (let [vars (r/atom {:x 0 :y 0}) result (r/atom 0)]
+  (let [testData (r/atom {:x 0 :y 0 :result 0})]
   (fn []
      [:div
       [:p "Enter First Number:"]
-      [text-field :input.input :x vars ]
+      [text-field :input.input :x testData ]
       [:p]
       [:p "Enter Second Number:"]
-      [text-field :input.input :y vars]
+      [text-field :input.input :y testData]
+      [:a.radio {:on-click #(postSum testData)}  "+"]
+      [:a.radio {:on-click #(postProduct testData)} "*"]
+      [:p "The result is: " (:result @testData)]
       ]
      ))
   )
