@@ -101,7 +101,13 @@
       [:a.radio {:on-click #(postQuotient testData)} "/"]
 
       ;[:input {:type :radio :on-click #(postProduct testData)} "*"]testData
-      [:p "The result is: " (:result @testData)]
+      ;[:p "The result is: " (:result @testData)]
+      [:p (cond
+             (< (:result @testData) 20) {:style {:background-color "LightGreen"}}
+             (and (< 19 (:result @testData)) (< (:result @testData) 50) ) {:style {:background-color "LightBlue"}}
+             (< 49 (:result @testData)) {:style {:background-color "LightSalmon"}})
+
+       "The result is: " (:result @testData)]
       ]
      ))
   )
