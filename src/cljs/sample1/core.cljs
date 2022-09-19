@@ -65,6 +65,16 @@
                            :params  {:x (:x @data) :y (:y @data)}
                            :handler #(swap! data assoc :result (:total %))}))
 
+(defn postDifference [data]
+  (POST "/api/math/minus" {:headers {"accept" "application/json"}
+                           :params  {:x (:x @data) :y (:y @data)}
+                           :handler #(swap! data assoc :result (:total %))}))
+
+(defn postQuotient [data]
+  (POST "/api/math/divide" {:headers {"accept" "application/json"}
+                           :params  {:x (:x @data) :y (:y @data)}
+                           :handler #(swap! data assoc :result (:total %))}))
+
 (defn text-field [tag id data] ;function for input text element. Tag should be :input.input, id is the keyword to access data (:x or :y)
   [:div.field
    [tag
@@ -85,8 +95,12 @@
       [:p]
       [:p "Enter Second Number:"]
       [text-field :input.input :y testData]
-      [:a.radio {:on-click #(postSum testData)}  "+"]
+      [:a.radio {:on-click #(postSum testData)} "+"]
       [:a.radio {:on-click #(postProduct testData)} "*"]
+      [:a.radio {:on-click #(postDifference testData)} "-"]
+      [:a.radio {:on-click #(postQuotient testData)} "/"]
+
+      ;[:input {:type :radio :on-click #(postProduct testData)} "*"]testData
       [:p "The result is: " (:result @testData)]
       ]
      ))
